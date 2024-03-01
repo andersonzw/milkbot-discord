@@ -1,10 +1,10 @@
-const ytdl = require("ytdl-core");
+const play = require("play-dl");
 const {
   createAudioPlayer,
   createAudioResource,
   getVoiceConnection,
   joinVoiceChannel,
-  
+  NoSubscriberBehavior,
 } = require("@discordjs/voice");
 
 module.exports = {
@@ -29,17 +29,19 @@ module.exports = {
       }
     }
     const url = message.content.split(" ")[1];
-    if (ytdl.validateURL(url)) {
-      const stream = ytdl(url, { filter: "audioonly" });
-      const resource = createAudioResource(stream);
-      const player = createAudioPlayer();
 
+    let stream = await play.stream(url);
+    let resource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+    });
+
+    let player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Play,
+      },
+    });
       player.play(resource);
       connection.subscribe(player);
-
       message.reply("Now playing your requested song! 動画を流します！");
-    } else {
-      message.reply("Please provide a valid YouTube URL. リンクが違います！");
-    }
   },
 };

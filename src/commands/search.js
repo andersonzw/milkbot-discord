@@ -3,9 +3,10 @@ const {
   createAudioPlayer,
   getVoiceConnection,
   joinVoiceChannel,
+  NoSubscriberBehavior,
 } = require("@discordjs/voice");
 const { google } = require("googleapis");
-const ytdl = require("ytdl-core");
+const play = require("play-dl");
 const youtube = google.youtube({
   version: "v3",
   auth: process.env.YOUTUBE_API_KEY,
@@ -31,7 +32,7 @@ module.exports = {
     // query for the searched song
     const searchQuery = message.content.replace("!search ", "");
     const url = await searchYouTube(searchQuery);
-    // play the song using same logic as !play
+    
     const voiceConnection = getVoiceConnection(message.guild.id);
     // join channel if not in one yet
     if (!voiceConnection) {
@@ -50,11 +51,20 @@ module.exports = {
       }
     }
 
-    const stream = ytdl(url, { filter: "audioonly" });
-    const resource = createAudioResource(stream);
-    const player = createAudioPlayer();
-    player.play(resource);
-    connection.subscribe(player);
-    message.reply(`Now playing your requested song! 動画を流します！ \n ${url}`);
+    let stream = await play.stream(url);
+    let resource = createAudioResource(stream.stream, {
+      inputType: stream.type,
+    });
+
+    let player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Play,
+      },
+    });
+      player.play(resource);
+      connection.subscribe(player);
+      message.reply("Now playing your requested song! 動画を流します！");
+    
+    
   },
 };
