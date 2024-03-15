@@ -1,4 +1,5 @@
 const { joinVoiceChannel } = require("@discordjs/voice");
+const { startIdleTimer } = require("../utility/idletimer");
 
 module.exports = {
   name: "join",
@@ -14,6 +15,7 @@ module.exports = {
       message.reply(
         "I have successfully joined the voice channel! お邪魔します！"
       );
+      startIdleTimer(message);
     } else {
       message.reply(
         "You need to join a voice channel first! 先にボイスチャネルに入ってください！"

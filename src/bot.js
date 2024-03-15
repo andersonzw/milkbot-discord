@@ -1,6 +1,7 @@
 require("dotenv").config();
 const fs = require("fs");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
+const { getVoiceConnection } = require("@discordjs/voice");
 
 const client = new Client({
   intents: [
@@ -13,7 +14,7 @@ const client = new Client({
 });
 
 let connection;
-console.log(process.env.DISCORD_BOT_TOKEN)
+console.log(process.env.DISCORD_BOT_TOKEN);
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 client.commands = new Collection();
@@ -29,6 +30,7 @@ for (const file of commandFiles) {
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  client.user.setPresence({activity: { name: 'ミルクごくごく！'}})
 });
 
 client.on("messageCreate", (message) => {

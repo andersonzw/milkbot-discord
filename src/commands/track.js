@@ -16,7 +16,7 @@ module.exports = {
     const status = await message.reply(
       `${new Date().toISOString()} Starting Tracking... ${url}`
     );
-    async function checkWebpage() {
+    const checkWebpage = async () => {
       refreshCount += 1;
       try {
         const channel = message.channelId;

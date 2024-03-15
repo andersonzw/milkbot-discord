@@ -6,6 +6,7 @@ const {
   joinVoiceChannel,
   NoSubscriberBehavior,
 } = require("@discordjs/voice");
+const { startIdleTimer } = require("../utility/idletimer");
 
 module.exports = {
   name: "play",
@@ -35,6 +36,10 @@ module.exports = {
       let resource = createAudioResource(stream.stream, {
         inputType: stream.type,
       });
+      let yt_info = await play.video_info(url)
+      console.log(yt_info.video_details);
+
+
 
       let player = createAudioPlayer({
         behaviors: {
@@ -44,9 +49,22 @@ module.exports = {
       player.play(resource);
       connection.subscribe(player);
       message.reply("Now playing your requested song! 動画を流します！");
+
+      player.on('stateChange', (oldState, newState )=> {
+        if (newState.status === 'idle') {
+          startIdleTimer(message)
+        }
+      })
     } catch (error) {
       message.reply("Invalid URL");
       console.log(error);
     }
+
+
+    // start idle timer after music stops
+  
+
+
+
   },
 };

@@ -7,11 +7,12 @@ const {
 } = require("@discordjs/voice");
 const { google } = require("googleapis");
 const play = require("play-dl");
+const { startIdleTimer } = require("../utility/idletimer");
 const youtube = google.youtube({
   version: "v3",
   auth: process.env.YOUTUBE_API_KEY,
 });
-async function searchYouTube(query) {
+const searchYouTube = async (query) => {
   const res = await youtube.search.list({
     part: "snippet",
     q: query,
@@ -24,7 +25,7 @@ async function searchYouTube(query) {
   } else {
     return null;
   }
-}
+};
 module.exports = {
   name: "youtube",
   description: "searches for a youtube video",
@@ -32,7 +33,7 @@ module.exports = {
     // query for the searched song
     const searchQuery = message.content.replace("!search ", "");
     const url = await searchYouTube(searchQuery);
-    
+
     const voiceConnection = getVoiceConnection(message.guild.id);
     // join channel if not in one yet
     if (!voiceConnection) {
@@ -56,21 +57,25 @@ module.exports = {
       let resource = createAudioResource(stream.stream, {
         inputType: stream.type,
       });
-  
+
       let player = createAudioPlayer({
         behaviors: {
           noSubscriber: NoSubscriberBehavior.Play,
         },
       });
-        player.play(resource);
-        connection.subscribe(player);
-        message.reply(`Now playing your requested song! 動画を流します！ \n ${url}`);
-      
-      
-    } catch (error) {
-      message.reply("Error")
-    }
+      player.play(resource);
+      connection.subscribe(player);
+      message.reply(
+        `Now playing your requested song! 動画を流します！ \n ${url}`
+      );
 
-  
+      player.on('stateChange', (oldState, newState )=> {
+        if (newState.status === 'idle') {
+          startIdleTimer(message)
+        }
+      })
+    } catch (error) {
+      message.reply("Error");
+    }
   },
 };
