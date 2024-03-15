@@ -28,20 +28,25 @@ module.exports = {
         return;
       }
     }
-    const url = message.content.split(" ")[1];
+    try {
+      const url = message.content.split(" ")[1];
 
-    let stream = await play.stream(url);
-    let resource = createAudioResource(stream.stream, {
-      inputType: stream.type,
-    });
+      let stream = await play.stream(url);
+      let resource = createAudioResource(stream.stream, {
+        inputType: stream.type,
+      });
 
-    let player = createAudioPlayer({
-      behaviors: {
-        noSubscriber: NoSubscriberBehavior.Play,
-      },
-    });
+      let player = createAudioPlayer({
+        behaviors: {
+          noSubscriber: NoSubscriberBehavior.Play,
+        },
+      });
       player.play(resource);
       connection.subscribe(player);
       message.reply("Now playing your requested song! 動画を流します！");
+    } catch (error) {
+      message.reply("Invalid URL");
+      console.log(error);
+    }
   },
 };
